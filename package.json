@@ -11,11 +11,13 @@
     "build:frontend": "npm run build --prefix frontend",
     "render-build": "npm install --prefix backend && npm install --prefix frontend && npm run build --prefix frontend",
     "build": "npm run build:frontend",
+    "ng": "ng",
     "start": "cross-env NODE_ENV=production node backend/server.js",
     "start:local-backend": "node backend/server.js",
     "start:local-frontend": "npm run start --prefix frontend"
   },
   "dependencies": {
-    "cross-env": "^7.0.3"
+    "cross-env": "^7.0.3",
+    "@angular/cli": "~18.0.0"
   }
 }
