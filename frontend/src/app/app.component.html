@@ -1,0 +1,259 @@
+<div class="dashboard-wrapper">
+  <!-- Fondo decorativo con gradientes y esferas de luz -->
+  <div class="glow-orb orb-1"></div>
+  <div class="glow-orb orb-2"></div>
+  <div class="glow-orb orb-3"></div>
+
+  <div class="container">
+    <!-- Encabezado Principal -->
+    <header class="main-header animate-fade-in">
+      <div class="logo-area">
+        <span class="logo-icon">🚚</span>
+        <div class="logo-text">
+          <h1>Mini Core</h1>
+          <p>Logística & Envíos MVC</p>
+        </div>
+      </div>
+      <div class="badge-framework">
+        <span class="badge angular">Angular</span>
+        <span class="badge-plus">+</span>
+        <span class="badge express">Express</span>
+      </div>
+    </header>
+
+    <!-- Contenido del Dashboard -->
+    <main class="dashboard-grid">
+      
+      <!-- Panel de Control / Formulario de Filtro (Glassmorphism) -->
+      <section class="control-panel glass-card animate-slide-up">
+        <h2 class="section-title">🔍 Filtro de Envíos</h2>
+        <p class="section-desc">Selecciona un rango de fechas para calcular los costos totales por repartidor.</p>
+
+        <form (ngSubmit)="consultarReporte()" #filterForm="ngForm" class="filter-form">
+          <div class="form-group">
+            <label for="fechaInicio">Fecha Inicio</label>
+            <div class="input-wrapper">
+              <span class="input-icon">📅</span>
+              <input 
+                type="date" 
+                id="fechaInicio" 
+                name="fechaInicio" 
+                [(ngModel)]="fechaInicio" 
+                required 
+                #inicioRef="ngModel"
+                class="form-control"
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="fechaFin">Fecha Fin</label>
+            <div class="input-wrapper">
+              <span class="input-icon">📅</span>
+              <input 
+                type="date" 
+                id="fechaFin" 
+                name="fechaFin" 
+                [(ngModel)]="fechaFin" 
+                required 
+                #finRef="ngModel"
+                class="form-control"
+              />
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" [disabled]="loading || !filterForm.valid" class="btn-primary">
+              <span *ngIf="loading" class="spinner"></span>
+              <span *ngIf="!loading">🚀 Calcular Costos</span>
+            </button>
+            <button type="button" (click)="limpiarForm()" class="btn-secondary">
+              🧹 Limpiar
+            </button>
+          </div>
+        </form>
+
+        <!-- Mensajes de Error -->
+        <div *ngIf="error" class="alert alert-error">
+          <span class="alert-icon">⚠️</span>
+          <p>{{ error }}</p>
+        </div>
+      </section>
+
+      <!-- Panel de Resultados -->
+      <div class="results-wrapper">
+        
+        <!-- Tarjetas de KPIs (Resumen rápido) -->
+        <section *ngIf="submitted && !loading && !error" class="kpi-panel animate-fade-in">
+          <div class="kpi-card glass-card border-neon-purple">
+            <div class="kpi-icon">📦</div>
+            <div class="kpi-info">
+              <h3>Envíos Totales</h3>
+              <p class="kpi-value">{{ kpiTotalEnvios }}</p>
+            </div>
+          </div>
+
+          <div class="kpi-card glass-card border-neon-pink">
+            <div class="kpi-icon">⚖️</div>
+            <div class="kpi-info">
+              <h3>Peso Acumulado</h3>
+              <p class="kpi-value">{{ kpiTotalKg | number:'1.1-2' }} <span class="kpi-unit">kg</span></p>
+            </div>
+          </div>
+
+          <div class="kpi-card glass-card border-neon-green">
+            <div class="kpi-icon">💰</div>
+            <div class="kpi-info">
+              <h3>Costo Logístico</h3>
+              <p class="kpi-value text-green">${{ kpiTotalCosto | number:'1.2-2' }}</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Tabla y Desglose -->
+        <section class="table-panel glass-card animate-slide-up" *ngIf="submitted && !loading && !error">
+          <div class="table-header-row">
+            <h2 class="section-title">📊 Resumen por Repartidor</h2>
+            <span class="range-badge" *ngIf="rangoConsultado.inicio">
+              Período: {{ rangoConsultado.inicio | date:'dd/MM/yyyy' }} - {{ rangoConsultado.fin | date:'dd/MM/yyyy' }}
+            </span>
+          </div>
+
+          <div class="table-responsive">
+            <table class="dashboard-table">
+              <thead>
+                <tr>
+                  <th>Repartidor</th>
+                  <th class="text-center">Envíos</th>
+                  <th class="text-center">Total kg</th>
+                  <th>Zona</th>
+                  <th>Tarifa/kg</th>
+                  <th class="text-right">Costo Total</th>
+                  <th class="text-center">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <ng-container *ngFor="let rep of reporte">
+                  <!-- Fila Principal -->
+                  <tr [class.expanded-row-bg]="expandedRepartidorId === rep.id_repartidor">
+                    <td class="td-repartidor" data-label="Repartidor">
+                      <div class="avatar-circle">{{ rep.nombre.charAt(0) }}</div>
+                      <div>
+                        <div class="name">{{ rep.nombre }}</div>
+                        <div class="email">{{ rep.email }}</div>
+                      </div>
+                    </td>
+                    <td class="text-center" data-label="Envíos">
+                      <span class="badge-count" [class.badge-zero]="rep.cantidadEnvios === 0">
+                        {{ rep.cantidadEnvios }}
+                      </span>
+                    </td>
+                    <td class="text-center font-mono" data-label="Total kg">
+                      {{ rep.cantidadEnvios > 0 ? (rep.totalKg | number:'1.1-2') + ' kg' : '—' }}
+                    </td>
+                    <td data-label="Zona">
+                      <span class="badge-zone" [class.badge-multi]="rep.zona === 'Múltiples'" [class.badge-none]="rep.zona === '—'">
+                        {{ rep.zona }}
+                      </span>
+                    </td>
+                    <td class="font-mono" data-label="Tarifa/kg">
+                      {{ rep.tarifa }}
+                    </td>
+                    <td class="text-right font-mono font-bold text-green" data-label="Costo Total">
+                      {{ rep.cantidadEnvios > 0 ? '$' + (rep.costoTotal | number:'1.2-2') : 'No aplica' }}
+                    </td>
+                    <td class="text-center" data-label="Acciones">
+                      <button 
+                        (click)="toggleDetalles(rep.id_repartidor)" 
+                        [disabled]="rep.cantidadEnvios === 0"
+                        class="btn-icon" 
+                        [class.active]="expandedRepartidorId === rep.id_repartidor"
+                        title="Ver desglose de envíos"
+                      >
+                        👁️
+                      </button>
+                    </td>
+                  </tr>
+
+                  <!-- Fila de Detalles Desplegables (Animación de sub-tabla) -->
+                  <tr *ngIf="expandedRepartidorId === rep.id_repartidor" class="details-row">
+                    <td colspan="7">
+                      <div class="details-container">
+                        <h4>📦 Desglose de Envíos Realizados por {{ rep.nombre }}</h4>
+                        <table class="sub-table">
+                          <thead>
+                            <tr>
+                              <th>ID Envío</th>
+                              <th>Fecha de Envío</th>
+                              <th>Zona de Entrega</th>
+                              <th class="text-right">Tarifa por kg</th>
+                              <th class="text-right">Peso (kg)</th>
+                              <th class="text-right">Costo Calculado (peso × tarifa)</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr *ngFor="let env of rep.envios">
+                              <td class="font-mono" data-label="ID Envío">#{{ env.id_envio }}</td>
+                              <td data-label="Fecha">{{ env.fecha_envio | date:'dd/MM/yyyy HH:mm' }}</td>
+                              <td data-label="Zona">
+                                <span class="badge-zone">{{ env.zona?.nombre_zona }}</span>
+                              </td>
+                              <td class="text-right font-mono" data-label="Tarifa/kg">${{ env.zona?.tarifa_por_kg | number:'1.2-2' }}</td>
+                              <td class="text-right font-mono" data-label="Peso">{{ env.peso_kg | number:'1.1-2' }} kg</td>
+                              <td class="text-right font-mono font-bold text-indigo-light" data-label="Costo">${{ env.costo | number:'1.2-2' }}</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </td>
+                  </tr>
+                </ng-container>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Estado de Carga (Spinner elegante) -->
+        <div *ngIf="loading" class="state-container glass-card">
+          <div class="custom-loader"></div>
+          <p>Consultando base de datos y calculando costos...</p>
+        </div>
+
+        <!-- Pantalla de Bienvenida (Antes de enviar) -->
+        <div *ngIf="!submitted && !loading" class="state-container glass-card animate-fade-in">
+          <div class="welcome-icon">🚛</div>
+          <h3>Listo para Calcular</h3>
+          <p>Ingrese un rango de fechas en el panel de control de la izquierda y presione "Calcular Costos" para procesar el reporte logístico.</p>
+          <div class="hint-box">
+            <strong>💡 Tip de prueba:</strong> La base de datos contiene datos semilla entre <strong>enero y agosto de 2025</strong> (ej. 2025-01-01 al 2025-08-31).
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Sección Explicativa del MVC (Fin pedagógico) -->
+    <footer class="pedagogical-section glass-card animate-fade-in">
+      <h3>🎓 Explicación del Patrón MVC en este Ejercicio</h3>
+      <div class="mvc-grid">
+        <div class="mvc-card">
+          <span class="mvc-tag model">M</span>
+          <h4>Modelo (Model)</h4>
+          <p>Definido en el backend mediante schemas de Mongoose (<code>Repartidor.js</code>, <code>Zona.js</code>, <code>Envio.js</code>). Administra las estructuras de datos y relaciones de llaves foráneas lógicas.</p>
+        </div>
+        <div class="mvc-card">
+          <span class="mvc-tag view">V</span>
+          <h4>Vista (View)</h4>
+          <p>La interfaz gráfica interactiva construida en Angular HTML (<code>app.component.html</code> + CSS). Presenta los datos formateados con pipes (<code>currency</code>, <code>number</code>, <code>date</code>) de forma atractiva.</p>
+        </div>
+        <div class="mvc-card">
+          <span class="mvc-tag controller">C</span>
+          <h4>Controlador (Controller)</h4>
+          <p>Representado en el backend por <code>envioController.js</code> (procesa la lógica de cálculo agrupada) y en el frontend por <code>app.component.ts</code> (gestiona las peticiones HTTP y estados de UI).</p>
+        </div>
+      </div>
+      <div class="flow-explanation">
+        <p><strong>🔄 Flujo de Datos:</strong> La <strong>Vista</strong> envía el rango de fechas al <strong>Controlador</strong> de Angular $\rightarrow$ Éste hace una petición HTTP GET $\rightarrow$ El <strong>Controlador</strong> Express del Backend recibe la fecha, consulta los datos al <strong>Modelo</strong> Mongoose $\rightarrow$ Realiza el cálculo (<code>peso * tarifa</code>) $\rightarrow$ Retorna un JSON $\rightarrow$ La <strong>Vista</strong> se actualiza reactivamente mostrando los resultados.</p>
+      </div>
+    </footer>
+  </div>
+</div>
