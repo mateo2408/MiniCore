@@ -2,9 +2,14 @@
   "name": "minicore-logistics-root",
   "version": "1.0.0",
   "description": "Root package manager for Mini Core logistics application (Angular + Node.js)",
+  "engines": {
+    "node": ">=20.19.0",
+    "npm": ">=10.0.0"
+  },
   "scripts": {
     "install:all": "npm install --prefix backend && npm install --prefix frontend",
     "build:frontend": "npm run build --prefix frontend",
+    "render-build": "npm install --prefix backend && npm install --prefix frontend && npm run build --prefix frontend",
     "build": "npm run build:frontend",
     "start": "cross-env NODE_ENV=production node backend/server.js",
     "start:local-backend": "node backend/server.js",

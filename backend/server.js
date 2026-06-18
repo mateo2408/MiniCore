@@ -137,6 +137,10 @@ setTimeout(seedDatabase, 2000);
 // API Routes
 app.use('/api/envios', require('./routes/envioRoutes'));
 
+app.get('/healthz', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
 // Servir Frontend en Producción
 if (process.env.NODE_ENV === 'production') {
   // Ajustamos para Angular: dist/frontend/browser

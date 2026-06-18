@@ -1,14 +1,13 @@
 services:
   - type: web
-    name: minicore-logistics-mvc
-    env: node
+    name: minicore-logistics
+    runtime: node
     plan: free
-    buildCommand: npm run install:all && npm run build
-    startCommand: npm run start
+    buildCommand: npm run render-build
+    startCommand: npm start
+    healthCheckPath: /healthz
     envVars:
       - key: NODE_ENV
         value: production
-      - key: PORT
-        value: 3000
       - key: MONGODB_URI
-        sync: false # Se configurará en el dashboard de Render con la conexión de MongoAtlas
+        sync: false
