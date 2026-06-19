@@ -54,6 +54,40 @@ ng e2e
 
 Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
 
+## Deployed
+
+This application is deployed on:
+
+https://minicore-m4ci.onrender.com
+
+## Explanation Video
+
+You can find the video on:
+
+https://youtu.be/YfIHVq-38dU
+
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+
+Documentación oficial Angular: https://angular.dev/
+
+Documentación oficial Express: https://expressjs.com/en/
+
+Documentación Mongoose: https://mongoosejs.com/
+
+Documentación Render: https://render.com/docs/deploy-node-express-app
+
+https://render.com/docs/monorepo-support
+
+https://render.com/docs/blueprint-spec
+
+Video tutorial de Angular + Express:
+https://www.youtube.com/watch?v=LpDcOhhBX_A
+
+Video tutorial de despliegue en Render:
+https://www.youtube.com/watch?v=tR-e9r0gYvI
+
+## Contact Information
+Educational email: mateo.cisneros@udla.edu.ec
+Personal email: mateocisneros330@gmail.com
